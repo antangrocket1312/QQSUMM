@@ -7,7 +7,7 @@
 This repository maintains the code, data, and model checkpoints for the paper *QQSUM: A Novel Task and Model of Quantitative Query-Focused Summarization for Review-based Product Question Answering*
 
 We explored a new task, Quantitative Query-Focused Summarization (QQSUM), to generate comprehensive answers capturing diverse viewpoints along with their prevalence for review-based product question answering.
-![QQSUM_Task](QQSUM_Task.png)
+![QQSUM_Task](diagram/QQSUM_Task.png)
 
 
 [//]: # (# Code to release soon.)
@@ -47,16 +47,27 @@ python preprocessing/download_model.py --model models/atlas/xl --output_director
 This will download the requested model to the ```/checkpoints``` directory.
 
 ## The QQSUM-RAG Model
+We propose an end-to-end Retrieval Augmented Generation (RAG) model, namely QQSUM-RAG, for the QQSUM task.
+QQSUM-RAG extends RAG, employs few-shot learning to jointly train a KP-oriented retriever and a KP summary generator, enabling KP-based summaries that capture diverse and representative opinions in the answer.
+The below figure illustrates PAKPA framework with examples.
+Given an online user query on a product, QQSUM-RAG retrieves query-relevant comments from product reviews, clusters them by distinct opinions, and summarizes representative KPs from each cluster.
+QQSUM-RAG consists of two components/stages: 
+- **Stage 1: KP-Oriented Retrieval**: utilizes a Retriever to retrieve and cluster query-relevant comments into groups
+- **Stage 2: KP Summary Generation**: utilize  LLM to generate the final KP summary based on the comment clusters
 
-![QQSUM_Task](QQSUM_RAG_Model.png)
-
-
-### Model Checkpoint
-
-
-
+![QQSUM_Task](diagram/QQSUM_RAG_Model.png)
 
 ### Training
+To train JustiLM with default hyperparameters and settings mentioned in the paper, run the following command:
+```
+sh train.sh
+```
+
+All prompts are located under [```/prompts```](/prompts)
+
+### Model Checkpoint
+Model checkpoint can be downloaded from this [Google Drive link](https://drive.google.com/file/d/1M6JY0Cs3EG6N34S6mWAMpK3wX6TVF4UX/view?usp=sharing).
+Please download the file and unzip the [```exps```]() directory into the main working directory.
 
 ### Inference
 
@@ -74,7 +85,7 @@ Files in each folder:
 
 AmazonKP is curated based on a three-stage human-LLM collaborative annotation pipeline.
 Additionally, we provide the code for reproducing the curation of AmazonKP, which consists of 3 stages
-![AmazonKP_Annotation](AmazonKP_Annotation.png)
+![AmazonKP_Annotation](diagram/AmazonKP_Annotation.png)
 
 - **Stage 1:** Extracting key points (KPs) from gold community answer. We provided the code for prompting LLM to extract KPs from gold community answer in ...
 - **Stage 2:** LLM-based and Manual Comment-KP Matching. We provided the code for prompting LLM to perform comment-KP Matching in  ...
