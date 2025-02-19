@@ -67,7 +67,7 @@ All prompts are located under [```/prompts```](/prompts)
 
 ### Model Checkpoint
 Model checkpoint can be downloaded from this [Google Drive link](https://drive.google.com/file/d/1M6JY0Cs3EG6N34S6mWAMpK3wX6TVF4UX/view?usp=sharing).
-Please download the file and unzip the [```exps```]() directory into the main working directory.
+Please download the file and unzip the [```/exps```](./exps) directory into the main working directory.
 
 ### Inference
 
@@ -77,16 +77,8 @@ Please download the file and unzip the [```exps```]() directory into the main wo
 
 ## The AmazonKP Dataset
 We proposed AmazonKP, a new dataset specialized for training and evaluating models for the QQSUM task. 
-The dataset can be accessed under the ``data``/ folder.
+The dataset can be accessed under the [```/data```](./data) folder.
 Files in each folder:
 * ```.pkl```: data in .pkl format, accessible via Pandas library.
 * ```.csv```: data in .csv format.
 * ```.jsonl```: data in .jsonl format (only for Yelp raw data).
-
-AmazonKP is curated based on a three-stage human-LLM collaborative annotation pipeline.
-Additionally, we provide the code for reproducing the curation of AmazonKP, which consists of 3 stages
-![AmazonKP_Annotation](diagram/AmazonKP_Annotation.png)
-
-- **Stage 1:** Extracting key points (KPs) from gold community answer. We provided the code for prompting LLM to extract KPs from gold community answer in ...
-- **Stage 2:** LLM-based and Manual Comment-KP Matching. We provided the code for prompting LLM to perform comment-KP Matching in  ...
-- **Stage 3:** KP-based Summary
