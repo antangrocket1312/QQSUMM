@@ -36,6 +36,8 @@ conda install -c pytorch faiss-gpu=1.8.0
 We also need some additional packages to run the code. The list of packages is listed in ```requirements.txt```. On the main directory of the repository, run:
 ```bash
 pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+python -m spacy download en_core_web_lg
 ```
 
 Built upon [Atlas](https://github.com/facebookresearch/atlas) as the backbone model, our model requires the Atlas pretrained checkpoints.
