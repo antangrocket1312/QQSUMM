@@ -1,3 +1,6 @@
+fairscale==0.4.6
+rouge==1.0.1
+wget
 datasets==2.16.1
 numpy==1.23.5
 openai==0.27.8

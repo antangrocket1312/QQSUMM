@@ -32,3 +32,12 @@ venv.bak/
 
 .idea/
 .vscode/
+
+*.pth.tar
+*.pt
+exps/
+data/copora/index**/
+data/copora/sample/index**/
+AutoGPTQ/
+/draft.py
+
