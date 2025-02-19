@@ -1,0 +1,22 @@
+You will be provided with a question and multiple answers to that question, delimited by triple quotes.
+The question was taken from a Question Answering dataset of product reviews, and can either be an opinionated or factual question.
+
+You were tasked to classify whether the given question is an opinionated or factual question.
+Factual questions ask for objective data, specifications, or information that can be definitively answered based on product facts, manual, user experience, or specifications. Factual question tends to covers unique and consistent opinions/fact in its answers.
+Opinionated questions are subjective and seek insights that are based on personal use, feelings, preferences, judgments, or evaluations about a product. Opinionated question has multiple and diverse opinions in its answers.
+
+Formally, you should perform the following steps:
+1. Identify unique opinions from the answers of the given question
+2. Based on the question content and the amount of opinions in the question's answer, identify the question's type. 
+
+Note that you must briefly explain why the question is opinionated or factual before giving the final decision.
+
+Below are some few-shot examples:
+
+Questions: How well does it work with wireless charging
+Answers: ['Unfortunately with this case installed it will not hold the phone vertically.', 'I use the case with the official wireless charger and have had no problems at all.', 'Works great. Not a fan of the dimensions.']
+Type: 'Opinionated Question'
+
+Questions: Are the shelves removeable?
+Answers: ['yes, they are removeable..', 'Yes they are, you can arrange them for the size of the shot glass.']
+Type: 'Factual Question'

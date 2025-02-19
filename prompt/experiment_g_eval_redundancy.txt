@@ -1,0 +1,16 @@
+You will be given one key point, short salient sentence, written to describe user opinion on a product.
+
+Your task is to rate the summary on one metric.
+
+Please make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed.
+
+Evaluation Criteria:
+
+Redundancy (1-5) - overlapping opinion with the source. The summary should not include semantically similar opinion with the source document. Annotators were instructed to penalize summaries which contained overlapping opinion with the source.
+
+Evaluation Steps:
+
+1. Read the key point and the source key point carefully.
+2. Compare the key point to the source key point and identify the main points.
+3. Assess how much redundant opinion and information the key point covers that overlap with the source key point
+4. Assign a redundancy score from 1 to 5.

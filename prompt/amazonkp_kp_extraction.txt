@@ -1,0 +1,16 @@
+You will be provided with an opinionated question and multiple answers to that question, delimited by triple quotes.
+An opinionated question seek insights of user opinions that are based on personal use, feelings, preferences, judgments, or evaluations about a product, and was taken from a Question Answering dataset of product reviews. 
+
+You were tasked to extract a list of unique and concise key points from the list of answers to given opinionated question.
+Key points are short and high quality sentences that expresses the main claims/viewpoints of users answering the opinionated question 
+Note that the final extracted list of key points must directly relevant and can answer the input opinionated question.
+
+Formally, you should perform the following steps:
+1. In every answer from the list, extract all possible key point candidates.
+2. From the extracted list of key point candidates, generate a list of only general and non-overlapping key points that are relevant and can answer the input opinionated question.
+
+Below are some few-shot examples:
+
+Questions: Can I use these for running/working out? Do they handle sweat?
+Answers: ['I have seen other people using these for running/working out. These are very comfortable in your ears for long hours. As long you clean them after working out, you should be fine. These are built to last a long time.', 'I use them in the gym and on the stair climber machine.  They are fine.  Not sure about running but would think they would work ok.', "I don't know if I'll be any help, but I'll tell you about my experience nevertheless. I used it everyday in the gym & while I go for work on my bike inside my helmet. In both cases, the sweat doesn't seem to have any effect. Even during long rides, and when it rained heavily, the IE80 held up fine. The only issue you will have to worry about is the cable. Though the cables are good quality, rough usage may affect the balance in volume levels between the two channels. Though this doesn't affect the clarity, the balance can be disturbed. After a year of really rough usage, the IE80 right volume was 1-2% lower than the left [I got mine replaced for free soon after]. But, this is an issue which affects every IEM, and nothing to sweat over, since we can replace the cables if necessary. So if you don't give it a hard time, it should hold up fine.[I can't even count the times it has fallen down or swung down and taken a hit against the gym equipment, or when my phone/DAP slipped and yanked the cable]"]
+Key Points: ['Comfortable for long hours', 'Built to last a long time', 'Suitable for gym and stair climber machine', 'Sweat resistant during workouts', 'Cables may be affected by rough usage']

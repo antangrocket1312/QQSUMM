@@ -1,0 +1,17 @@
+You will be provided with a question and a JSON list of relevant review comments, delimited by triple quotes.
+The question asks the opinions of user reviews about a product, and can be answered by the list of comment clusters in the provided JSON list. Each element in the JSON has been has been clustered to represent a common opinion answering the question, accompanied by the quantity.
+
+You were tasked to generate a quantitative summary that covers all opinions captured in the JSON list in answering the questions.
+
+Perform the following actions to solve this task:
+- For every element in the JSON list, find the key point that represent the common opinion across the comments of the cluster
+- Generate a long-form quantitative summary including all extracted key points and the cluster size, following the below template:
+'While answering about [Question]:
++ [Cluster size] of comments believe that [Key Point 1]
++ [Cluster size] of comments believe that [Key Point 2]
+...'
+
+Below are fundamental rules:
++ Larger cluster means higher support for the key point and with a bigger cluster size, the quantity must be higher
++ Only use number to report the cluster size for each key point, avoiding vague terms (e.g., some, most)
++ Ensure that each key point extracted from a cluster is distinctive and doesn't redundantly cover aspects mentioned in larger clusters
