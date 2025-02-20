@@ -1,8 +1,11 @@
 ## KP Textual Quality
+### Results
 
 ## Comment-KP Matching
+### Results
 
 ## Comment-KP Factual Consistency
+### Setup (Important)
 To reproduce comment-KP Factual Consistency evaluation, note that AlignScore are trained and evaluated using PyTorch 1.12.1.
 We recommend set up a separate Anaconda environment running Pytorch 1.12.1 in reference to the [AlignScore](https://github.com/yuh-zha/AlignScore)'s repo setup instruction.
 ```bash
@@ -19,3 +22,5 @@ Importantly, to run AlignScore, please download ``AlignScore-base`` checkpoint a
 **AlignScore-base:** https://huggingface.co/yzha/AlignScore/resolve/main/AlignScore-base.ckpt
 
 [//]: # (After download ``AlignScore-base`` model checkpoint, please move it to the ``/checkpoints`` in this directory.)
+
+### Results

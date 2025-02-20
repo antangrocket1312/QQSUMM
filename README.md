@@ -40,7 +40,8 @@ python -m spacy download en_core_web_sm
 python -m spacy download en_core_web_lg
 ```
 
-Built upon [Atlas](https://github.com/facebookresearch/atlas) as the backbone model, our model requires the Atlas pretrained checkpoints.
+[//]: # (Built upon [Atlas]&#40;https://github.com/facebookresearch/atlas&#41; as the backbone model, )
+Our model requires the [```atlas-xl```](https://github.com/facebookresearch/atlas?tab=readme-ov-file#models) pretrained checkpoints.
 Before training or inference, you must run the following command to download the pre-trained Atlas model, which include both the pretrained retriever and reader weights. 
 ```bash
 python preprocessing/download_model.py --model models/atlas/xl --output_directory ./checkpoints
