@@ -74,13 +74,13 @@ Please download the file and unzip the [```/exps```](./exps) directory into the 
 
 ### Inference
 
-### Model Performance
+### Evaluation & Performance
 
 [//]: # (## QQSUM: Task Introduction)
 
 ## The AmazonKP Dataset
 We proposed AmazonKP, a new dataset specialized for training and evaluating models for the QQSUM task.
-The dataset can be accessed under the ```data/``` folder, 
+The dataset can be accessed under the [```data/```](/data) folder, 
 following the [```train/```](/data/train) and [```test/```](/data/test) subdirectories for the train and test set.
 
 Files in each sub-directory:
