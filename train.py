@@ -246,28 +246,28 @@ if __name__ == "__main__":
         unknown_args,
     ) = parser.parse_args_into_dataclasses(return_remaining_strings=True)
 
-    if not opt.fc_only:
-        with open('./args_distillation.pkl', 'wb') as file:
-        # with open('./args_backbone.pkl', 'wb') as file:
-            pickle.dump([
-                opt,
-                model_args,
-                data_args,
-                training_args,
-                lora_args,
-                unknown_args
-            ], file)
-    else:
-        with open('./args_warmup.pkl', 'wb') as file:
-        # with open('./args_backbone.pkl', 'wb') as file:
-            pickle.dump([
-                opt,
-                model_args,
-                data_args,
-                training_args,
-                lora_args,
-                unknown_args
-            ], file)
+    # if not opt.fc_only:
+    #     with open('./args_distillation.pkl', 'wb') as file:
+    #     # with open('./args_backbone.pkl', 'wb') as file:
+    #         pickle.dump([
+    #             opt,
+    #             model_args,
+    #             data_args,
+    #             training_args,
+    #             lora_args,
+    #             unknown_args
+    #         ], file)
+    # else:
+    #     with open('./args_warmup.pkl', 'wb') as file:
+    #     # with open('./args_backbone.pkl', 'wb') as file:
+    #         pickle.dump([
+    #             opt,
+    #             model_args,
+    #             data_args,
+    #             training_args,
+    #             lora_args,
+    #             unknown_args
+    #         ], file)
 
     checkpoint_path, saved_index_path = create_checkpoint_directories(opt)
 
