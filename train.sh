@@ -28,7 +28,6 @@ python train.py \
     --reader_model_type mistralai/Mistral-7B-Instruct-v0.2 \
     --model_path ${PRETRAINED_MODEL} \
     --train_data ${TRAIN_FILE} \
-    --label_file ${LABEL_FILE} \
     --per_gpu_batch_size 1 \
     --n_context ${NCTX} --retriever_n_context ${NCTX} \
     --checkpoint_dir ${SAVE_DIR} \
@@ -40,10 +39,8 @@ python train.py \
     --lora_r 16 \
     --lora_alpha 32 \
     --lora_dropout 0.05 \
-    --data_path ./physionet.org/structured_CoT_brief_hospital_course_no_outlier_mistral.pkl \
     --bf16 False \
     --fp16 True \
-    --output_dir ./brief_hospital_course_mistral_gptq_1_epoch_r128_64a_new_pertinent_2_new_form \
     --num_train_epochs 1 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
@@ -78,7 +75,6 @@ python train.py \
     --reader_model_type mistralai/Mistral-7B-Instruct-v0.2 \
     --model_path ${SAVE_DIR}/${EXPERIMENT_NAME}/checkpoint/step-34 \
     --train_data ${TRAIN_FILE} \
-    --label_file ${LABEL_FILE} \
     --fc_file ${FC_FILE} \
     --cluster_file ${CLUSTER_FILE} \
     --per_gpu_batch_size 1 \
@@ -95,10 +91,8 @@ python train.py \
     --lora_r 16 \
     --lora_alpha 32 \
     --lora_dropout 0.05 \
-    --data_path ./physionet.org/structured_CoT_brief_hospital_course_no_outlier_mistral.pkl \
     --bf16 False \
     --fp16 True \
-    --output_dir ./brief_hospital_course_mistral_gptq_1_epoch_r128_64a_new_pertinent_2_new_form \
     --num_train_epochs 1 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
