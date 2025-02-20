@@ -79,9 +79,34 @@ Please download the file and unzip the [```/exps```](./exps) directory into the 
 [//]: # (## QQSUM: Task Introduction)
 
 ## The AmazonKP Dataset
-We proposed AmazonKP, a new dataset specialized for training and evaluating models for the QQSUM task. 
-The dataset can be accessed under the [```/data```](./data) folder.
-Files in each folder:
-* ```.pkl```: data in .pkl format, accessible via Pandas library.
-* ```.csv```: data in .csv format.
-* ```.jsonl```: data in .jsonl format (only for Yelp raw data).
+We proposed AmazonKP, a new dataset specialized for training and evaluating models for the QQSUM task.
+The dataset can be accessed under the ```data/``` folder, 
+following the [```train/```](/data/train) and [```test/```](/data/test) subdirectories for the train and test set.
+
+Files in each sub-directory:
+```
+data
+├── train
+│   ├── train.jsonl
+│   ├── copora
+│       ├── input_reviews.jsonl
+│       ├── gold_comment_clusters.jsonl
+│       ├── gold_retrieved_comments.jsonl
+├── test
+│   ├── test.jsonl
+│   ├── copora
+│       ├── input_reviews.jsonl
+├── full
+│   ├── amazon_kp_dataset.jsonl
+│   ├── amazon_kp_dataset.csv
+│   ├── amazon_kp_dataset.pkl
+```
+
+File description:
+* ```train.jsonl``` or ```test.jsonl``` : Input data file containing the input question, i.e., query, and the final key point (KP) summary ground truth. 
+* ```input_reviews.jsonl```: Complementary input product review comments of questions in  ```train.jsonl``` or ```test.jsonl```
+* ```gold_comment_clusters.jsonl```: Clusters of comments formed by comment-KP matching annotation (Stage 2)
+* ```gold_retrieved_comments.jsonl```: query-relevant comments aggregated from annotated clusters
+
+*NOTE: For training or evaluating QQSUM-RAG on your own dataset instead of AmazonKP, please make sure to follow the data format and structure given in the above `jsonl` files*
+
