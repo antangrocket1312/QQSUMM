@@ -37,8 +37,6 @@ from fastchat.train.train import (
     make_supervised_data_module,
 )
 import pickle
-# from src.options_hf import RAGArguments
-# from src.options import Options
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 GRAD_SCALE_UPPER_BOUND_MEAN: int = 1000
@@ -206,18 +204,6 @@ def train(
 
                 logger.info(log)
                 run_stats.reset()
-
-            # if step % opt.eval_freq == 0:
-            #     for data_path in opt.eval_data:
-            #         dataset_name = os.path.basename(data_path)
-            #
-            #         metrics = evaluate(model, index, opt, data_path, step)
-            #         log_message = f"Dataset: {dataset_name}"
-            #         for k, v in metrics.items():
-            #             log_message += f" | {v:.3f} {k}"
-            #             if tb_logger:
-            #                 tb_logger.add_scalar(f"{dataset_name}/{k}", v, step)
-            #         logger.info(log_message)
 
             if step % opt.save_freq == 0:
                 save_atlas_model(

@@ -102,25 +102,6 @@ def encode_clusters(batch, tokenizer, max_length):
         cluster_tok_batch += [cluster_tok]
     return cluster_tok_batch
 
-
-# def encode_reader_prompt(batch, tokenizer, max_length):
-#     tokens = tokenizer(
-#         batch,
-#         return_tensors="pt",
-#         padding="max_length",
-#         max_length=max_length,
-#         truncation=True,
-#     )
-#
-#     # Copy the input_ids to labels, forward function of LLM automatically shift right
-#     tokens['labels'] = tokens.input_ids[:]
-#     # Create labels by shifting the input_ids to the right by one position
-#     # tokens['labels'] = tokens.input_ids[:]  # Copy the input_ids to labels
-#     # tokens['labels'][:-1] = tokens['input_ids'][1:]  # Shift labels to the right
-#     # tokens['labels'][-1] = -100  # Mask the last position
-#
-#     return tokens
-
 def encode_reader_prompt_train(batch, tokenizer, max_length):
     tokens = tokenizer(
         batch,
@@ -313,12 +294,10 @@ class Atlas(nn.Module):
             passage_emb[b : b + encoder_batch_size] = batch_emb
 
         passage_emb = passage_emb.view(bsz, min(passage_emb.size()[0], to_rerank), 768)
-        # passage_emb = passage_emb.view(bsz, to_rerank, 768)
 
         # Rerank based on retriever scores
         # DOT PRODUCT OF EMBEDDINGS (TO GET SIMILARITY SCORE BETWEEN THE QUERY AND EACH PASSAGE)
         retriever_scores = torch.einsum("id, ijd->ij", [query_emb, passage_emb])
-        # top_retriever_scores, top_retriever_inds = torch.topk(retriever_scores, topk, dim=1)
 
         final_output_passages, final_output_scores = ([], [])
         if self.opt.train_with_rank_threshold or not is_train:
@@ -342,25 +321,21 @@ class Atlas(nn.Module):
                 output_passage = []
                 output_score = []
                 for passage, score in zip(output_passages[i], output_scores[i]):
-                # for passage, score in zip(passages[i], retriever_scores[i]):
                     if score >= self.opt.rank_threshold:
                         output_passage += [passage]
                         output_score += [score]
                 final_output_passages += [output_passage]
                 final_output_scores += [output_score]
-            # print("TOP RETRIEVER SCORES", len(output_scores[0]), output_scores[0])
         else:
             # Default training, dynamically taking the size of query-relevant comments as topk
             top_retriever_scores, top_retriever_inds = torch.topk(retriever_scores, min(len(passages[0]), len(self.all_fc[int(ids[0])])), dim=1)
             # # FOR MANUALLY INSPECTING AND TUNING FOR THE RETRIEVAL THRESHOLD
-            # print("RETRIEVER SCORES", retriever_scores)
             # print("TOP RETRIEVER SCORES", top_retriever_scores.size(), top_retriever_scores)
             for i in range(bsz):
                 final_output_passages.append([passages[i][j] for j in top_retriever_inds[i]])
                 final_output_scores.append(top_retriever_scores[i].tolist())
 
         return final_output_passages, final_output_scores
-        # return output_passages, output_scores
 
     @torch.no_grad()
     def retrieve(self, *args, **kwargs):
@@ -385,71 +360,6 @@ class Atlas(nn.Module):
             query_enc = None
         return _to_cuda(query_enc)
 
-    # def reader_tokenize(self, query, target, target_tokens):
-    #     if target_tokens is None:
-    #         if self.opt.decoder_prompt_format is not None:
-    #             modified_query = [self.opt.decoder_prompt_format.format_map({"query": q}) for q in query]
-    #             target = [q + t for (q, t) in zip(modified_query, target)]
-    #
-    #             query_mask = self.reader_tokenizer(
-    #                 modified_query,
-    #                 max_length=self.opt.target_maxlength,
-    #                 padding="max_length",
-    #                 truncation=True,
-    #                 return_tensors="pt",
-    #                 add_special_tokens=False,
-    #             )["attention_mask"]
-    #
-    #         if self.opt.decoder_format is not None:
-    #             target = [self.opt.decoder_format.format(target=t) for t in target]
-    #         target = [t + "</s>" if not t.endswith("</s>") else t for t in target]
-    #
-    #         target_tokens = self.reader_tokenizer(
-    #             target,
-    #             max_length=self.opt.target_maxlength,
-    #             padding="max_length",
-    #             truncation=True,
-    #             return_tensors="pt",
-    #             add_special_tokens=False,
-    #         )
-    #
-    #     decoder_input_ids = self.reader._shift_right(target_tokens["input_ids"])
-    #     labels = target_tokens["input_ids"].masked_fill(~target_tokens["attention_mask"].bool(), IGNORE_INDEX)
-    #
-    #     # If decoder prompt is not None mask labels such that the model is not trained to predict the prompt
-    #     if self.opt.decoder_prompt_format is not None:
-    #         query_mask = self.reader_tokenizer(
-    #             modified_query,
-    #             max_length=self.opt.target_maxlength,
-    #             padding="max_length",
-    #             truncation=True,
-    #             return_tensors="pt",
-    #             add_special_tokens=False,
-    #         )["attention_mask"]
-    #
-    #         padding = torch.zeros(
-    #             (
-    #                 query_mask.size(0),
-    #                 target_tokens["input_ids"].size(-1) - query_mask.size(-1),
-    #             )
-    #         )
-    #         query_mask = torch.cat([query_mask, padding], dim=1)
-    #         labels = labels.masked_fill(query_mask.bool(), IGNORE_INDEX)
-    #
-    #     return labels.cuda(), decoder_input_ids.cuda()
-
-    # def reader_tokenize_new(self, target):
-    #     target = [t + "</s>" if not t.endswith("</s>") else t for t in target]
-    #     target_tokens = self.reader_tokenizer(
-    #         target,
-    #         max_length=self.opt.target_maxlength,
-    #         padding="max_length",
-    #         truncation=True,
-    #         return_tensors="pt",
-    #         add_special_tokens=False,
-    #     )
-    #    ...
-
     def tokenize(self, query, target, target_tokens):
         if query is None and target is None:
             return None, None, None
@@ -460,10 +370,6 @@ class Atlas(nn.Module):
 
         query_enc = self.retriever_tokenize(query) if not self.opt.use_file_passages else None
         return query_enc
-
-        # labels, decoder_input_ids = self.reader_tokenize_new(target)
-        # labels, decoder_input_ids = self.reader_tokenize(query, target, target_tokens)
-        # return query_enc, labels, decoder_input_ids
 
     def tokenize_reader_prompt(self, query, comment_clusters, target=None):
         if target != None:  # Training mode
@@ -495,23 +401,14 @@ class Atlas(nn.Module):
         else: # Inference mode
             reader_prompt = ["<s>[INST] " + BASE_PROMPT + INPUT_TEMPLATE % (q, str(clusters)) + "Summary: [/INST]"
                              for q, clusters in zip(query, comment_clusters)]
-            # print("READER PROMPT INFERENCE", reader_prompt)
             reader_toks = encode_reader_prompt_inference(reader_prompt, self.reader_tokenizer)
             reader_toks = _to_cuda(reader_toks)
 
-        # reader_tok = encode_reader_prompt(reader_prompt, self.reader_tokenizer, self.opt.text_maxlength)
         return reader_toks
-
-    # def format_prompt(self, q, passages):
-    #     prompt = BASE_PROMPT + INPUT_TEMPLATE % (q, [p['text'] for p in passages])
-    #     return [prompt]
 
     def tokenize_passages(self, query, passages):
         if len(query) == 0:
             return None, None
-
-        # query_passages = [self.format_prompt(q, p) for q, p in zip(query, passages)]
-        # query_passages = [self.append_query(q, p) for q, p in zip(query, passages)]
 
         fstr = self.opt.retriever_format
         retriever_passages = [[fstr.format(**p) for p in example] for example in passages]
@@ -526,11 +423,6 @@ class Atlas(nn.Module):
             retriever_tok = None
 
         return retriever_tok
-        # reader_tok = encode_passages(query_passages, self.reader_tokenizer, self.opt.text_maxlength)
-        # reader_tok = _to_cuda(reader_tok)
-        # print("QUERY PASSAGES", query_passages)
-        # print("RETRIEVER PASSAGES", retriever_passages)
-        # return reader_tok, retriever_tok
 
     def tokenize_clusters(self, query, comment_clusters):
         if len(query) == 0:
@@ -573,8 +465,6 @@ class Atlas(nn.Module):
         with torch.no_grad():
             self.reader.eval()
             total_context = reader_tokens['input_ids'].size(1)
-            # cfg.n_context = 1
-            # cfg.bsz = bsz * total_context
 
             # Logits from the model
             logits = reader_output.logits  # (batch_size, seq_len, vocab_size)
@@ -596,13 +486,7 @@ class Atlas(nn.Module):
             num_valid_tokens = valid_mask.sum(dim=-1)
             gold_score = -sequence_log_prob / num_valid_tokens
             # print(gold_score)
-            # return gold_score.cpu().item()  # Shape: (batch_size,)
             return gold_score  # Shape: (batch_size,)
-
-            # Reshape to (batch_size, total_context) and aggregate across contexts
-            # gold_score = gold_score.view(bsz, total_context)  # Reshape for per-query context aggregation
-            # aggregated_gold_score = gold_score.mean(dim=-1)  # Aggregate across contexts (e.g., mean or sum)
-            # return aggregated_gold_score  # Shape: (batch_size,)
 
     def eval_score(self, reader_ids, reader_mask, decoder_input_ids, labels, cfg, bsz, mask_query):
         self.reader.eval()
@@ -719,25 +603,7 @@ class Atlas(nn.Module):
         loss = self.mse_loss(fc_passages_embs,passage_emb)
         return loss
 
-    # def lgret_score(self, ids, passage_emb):
-    #     fc_passages_embs = torch.Tensor([]).to(passage_emb)
-    #     for id in ids:
-    #         split_passages = util.split_fc_pas(id, self.all_fc[id])
-    #         fc_tokens = self.tokenize_passages(["" for i in range(len(split_passages))], [split_passages])
-    #         fc_tokens = {k: v.reshape(-1, v.size(-1)) for k, v in fc_tokens.items()}
-    #         fc_split_passage_emb = self.retriever(**fc_tokens, is_passages=False).to(passage_emb)
-    #         fc_passages_embs = torch.cat((fc_passages_embs, fc_split_passage_emb))
-    #
-    #     fc_passages_embs = fc_passages_embs.unsqueeze(0)
-    #     # print("NUM OF PREDICTED PASSAGES", passage_emb.size()[1])
-    #     print("PREDICTED PASSAGES EMB SHAPE", passage_emb.size())
-    #     print("FC EMB SHAPE ", fc_passages_embs.size())
-    #     loss = self.mse_loss(fc_passages_embs,passage_emb)
-    #     return loss
-
-
     def lgret_score_cluster(self, ids, clusters_emb, passage_emb):
-        # clusters_emb = []
         fc_clusters_emb_centroid = torch.Tensor([]).to(passage_emb)
         most_similar_fc_clusters_emb_centroid = torch.Tensor([]).to(passage_emb)
         clusters_emb_centroid = torch.Tensor([]).to(passage_emb)
@@ -770,11 +636,6 @@ class Atlas(nn.Module):
                 print("fc_clusters_embedding_centroid", fc_clusters_embedding_centroid.unsqueeze(0).size())
                 similarity_scores = torch.einsum('id, ijd->ij', [cluster_emb_centroid, fc_clusters_embedding_centroid.unsqueeze(0)])
 
-                # METHOD 1
-                # top_similarity_scores, similarity_inds = torch.topk(similarity_scores[0], 1, dim=0)
-                # most_similar_fc_cluster = [fc_clusters_embedding_centroid[j] for j in similarity_inds][0]
-
-                # METHOD 2
                 top_similarity_score, similarity_idx = torch.max(similarity_scores[0], dim=0)
                 most_similarity_indices += [similarity_idx]
                 most_similar_fc_cluster = fc_clusters_embedding_centroid[similarity_idx].unsqueeze(0)
@@ -796,17 +657,6 @@ class Atlas(nn.Module):
         # print("most_similar_fc_clusters_emb_centroid", most_similar_fc_clusters_emb_centroid.size())
         # loss = self.mse_loss(clusters_emb_centroid, most_similar_fc_clusters_emb_centroid)
         return loss, most_similarity_indices
-            #     top_retriever_scores, top_retriever_inds = torch.topk(retriever_scores, len(passages[0]), dim=1)
-            #     for i in range(bsz):
-            #         output_passages.append([passages[i][j] for j in top_retriever_inds[i]])
-            #         output_scores.append(top_retriever_scores[i].tolist())
-            #
-            #
-            #     fc_passage_emb = torch.mean(fc_split_passage_emb, dim=0).unsqueeze(0)
-            #
-            #     emb = self.retriever(**cluster_tok, is_passages=True).to(query_emb)
-            #     clusters_embedding += [emb]
-            # clusters_emb += [clusters_embedding]
 
     def cluster_average_similarity_to_query(self, single_cluster, query):
         cluster_tok = self.retriever_tokenizer(single_cluster, padding=True, truncation=True, return_tensors="pt")
@@ -814,16 +664,12 @@ class Atlas(nn.Module):
         # TODO: Focus here
         with torch.no_grad():
             passage_embeddings = self.retriever(**cluster_tok, is_passages=True)
-        #     with torch.no_grad():
-        #         passage_embeddings = model.retriever.passage_contriever(**cluster_tok)
 
         query_enc = self.retriever_tokenizer(query, padding=True, truncation=True, return_tensors="pt")
         query_enc = {k: v.cuda() for k, v in query_enc.items()}
         # TODO: Focus here
         with torch.no_grad():
             query_embeddings = self.retriever.contriever(**query_enc)
-            # query_embeddings = self.retriever(**cluster_tok, is_passages=False)
-            # query_embeddings = self.retriever.query_contriever(**query_enc)
 
             passage_embeddings_similarity = []
             for pe in passage_embeddings:
@@ -840,15 +686,12 @@ class Atlas(nn.Module):
         # TODO: Focus here
         with torch.no_grad():
             embeddings = self.retriever(**inputs, is_passages=True)
-        #     with torch.no_grad():
-        #         embeddings = model.retriever.passage_contriever(**inputs)
 
             clusters = util.deduplicate(sentences, embeddings, self.opt.clustering_threshold)
 
             filtered_clusters = []
             filtered_mean_similarity = []
             for single_cluster in clusters:
-                #         _, _, _, mean_similarity_to_query = cluster_average_similarity_to_query(
                 mean_similarity_to_query = self.cluster_average_similarity_to_query(
                     single_cluster,
                     query
@@ -881,26 +724,12 @@ class Atlas(nn.Module):
         if not self.opt.mt:
             del cls_label
 
-        # query_mask_reader = (
-        #     self.reader_tokenizer.batch_encode_plus(
-        #         query,
-        #         max_length=self.opt.text_maxlength,
-        #         padding="longest",
-        #         truncation=True,
-        #         return_tensors="pt",
-        #         add_special_tokens=False,
-        #     )["attention_mask"]
-        #     .bool()
-        #     .cuda()
-        # )
-        # print("HERERERERERER")
         # print(query, target, target_tokens)
         query_enc = self.tokenize(query, target, target_tokens)
         fc_only = self.opt.fc_only
 
-        # CLARIFY: DISTILLATION
         comment_clusters = []
-        if (not self.opt.use_file_passages) and (not fc_only):
+        if (not self.opt.use_file_passages) and (not fc_only):  # MAIN TRAINING (BACKBONE + DISTILLATION)
             retrieve_start = time.time()
             passages, _ = self.retrieve(
                 ids,
@@ -919,34 +748,22 @@ class Atlas(nn.Module):
             for q, pas in zip(query, passages):
                 filtered_clusters, _ = self.cluster_retrieved_passages(q, [p['text'] for p in pas])
                 filtered_clusters = [{'cluster_id': i, 'comments': c, 'cluster_size': len(c)} for i, c in enumerate(filtered_clusters)]
-                # filtered_clusters = [{'comments': c, 'cluster_size': len(c)} for c in filtered_clusters]
                 print("FILTERED CLUSTER SIZE: ", len(filtered_clusters))
                 comment_clusters += [filtered_clusters]
 
             print("IDS", ids[0])
             print("NUM OF PASSAGES BEFORE FILTER", len(passages[0]))
-            # passages[0] = tuple(pas for pas in passages[0] if pas['id'] == int(ids[0]))
             passages[0] = tuple(pas for pas in passages[0] if pas['asin'] == asin[0])
             # print(passages)
             print("NUM OF PASSAGES AFTER FILTER", len(passages[0]))
             iter_stats["runtime/retrieve"] = (time.time() - retrieve_start, 1)
 
-        # CLARIFY: BACKBONE TRAINING RUNS THIS, BUT QUITE DIFFERENT FROM THE PAPER
-        # AS THEY USED FC ARTICLE NOT INITIAL PASSAGE FOR TRAINING
-        if fc_only:
+        if fc_only: # FOR WARMUP ONLY
             search_start = time.time()
             passage_tmp = []
             comment_clusters_tmp = []
             for idx,id in enumerate(ids):
                 split_passages = util.split_fc_pas(id, self.all_fc[id])
-                # # 20 is the amount of empty token per additional passage to compensate in case of insufficiency
-                # tmp_text = [" ".join(["[MASK]" for _ in range(100)])]
-                # tmp_text_split = [" ".join(tmp_text[i: i + 100]).strip() for i in range(0, len(tmp_text), 100)]
-                # # tmp_text = [" ".join(["[MASK]" for _ in range(20)])]
-                # # tmp_text_split = [" ".join(tmp_text[i : i + 20]).strip() for i in range(0, len(tmp_text), 20)]
-                # padding_pas = {'id':-1,'title':"","text":tmp_text_split[0]}
-                # split_passages = split_passages + [padding_pas for p in range(self.opt.retriever_n_context)]
-                # # passage_tmp.append(split_passages[:self.opt.retriever_n_context])
                 passage_tmp.append(split_passages)
                 comment_clusters_tmp.append(self.all_cluster[id])  # Get ground truth clusters
 
@@ -954,8 +771,6 @@ class Atlas(nn.Module):
             comment_clusters = comment_clusters_tmp
             iter_stats["runtime/match"] = (time.time() - search_start, 1)
 
-        # TODO: Edit tokenize_passages to encode comment_clusters instead of passages
-        # TODO: Replace tokenize_passages with tokenize_clusters
         clusters_tokens = self.tokenize_clusters(query, comment_clusters)
         # print(cluster_tokens)
         retriever_tokens = self.tokenize_passages(query, passages)
@@ -981,8 +796,8 @@ class Atlas(nn.Module):
                     loss_values.append(single_kp_reader_loss)
                 reader_loss = loss_values
             print("OK 3")
-
         # print("TOTAL CONTEXT", reader_tokens_kp_list[0][0]["input_ids"].size(1))
+
         retriever_loss = []
         # CLARIFY: DISTILLATION FOR RETRIEVER, HERE WE FOCUS ON lgret (ARTICLE-LEVEL RETRIEVAL DISTILLATION)
         if train_retriever:
@@ -1009,7 +824,6 @@ class Atlas(nn.Module):
             with torch.no_grad():
                 passage_emb = self.retriever(**retriever_tokens, is_passages=True).to(query_emb)
             passage_emb = passage_emb.view(bsz, -1, passage_emb.size(-1))
-            # retriever_score = torch.einsum("id, ijd->ij", [query_emb, passage_emb])
             cluster_score = []
             for clusters_embedding in clusters_emb:
                 for emb in clusters_embedding:
@@ -1020,8 +834,6 @@ class Atlas(nn.Module):
             if self.opt.lgret:
                 retrieval_loss_lgret= self.lgret_score(ids,passage_emb)
                 loss_lgret_cluster, most_similarity_indices = self.lgret_score_cluster(ids,clusters_emb,passage_emb)
-                # if not torch.isnan(loss_lgret_cluster):
-                #     loss_lgret = loss_lgret + loss_lgret_cluster
 
                 for i, each_loss_lgret_cluster in enumerate(loss_lgret_cluster):
                     if i == 0:
@@ -1029,35 +841,31 @@ class Atlas(nn.Module):
                     else:
                         loss_lgret += [each_loss_lgret_cluster]
 
-                # loss_lgret = self.lgret_score_cluster(ids,clusters_emb,passage_emb)
-
             # READER LOSS SPECIFICALLY ON KPS PRODUCED BY PREDICTED CLUSTERS
-            # most_similar_bullet_target = [[bullet for i, bullet in enumerate(t.split("\n")) if i in most_similarity_indices] for t in target]
             most_similar_bullet_target = [[t.split("\n")[index] for index in most_similarity_indices] for t in target]
-            print("MOST SIMILAR INDICE", most_similarity_indices)
-            print("MOST SIMILAR BULLET", most_similar_bullet_target)
-            print("SUMMARY LENGTH", len(target[0].split("\n")))
+            # print("MOST SIMILAR INDICE", most_similarity_indices)
+            # print("MOST SIMILAR BULLET", most_similar_bullet_target)
+            # print("SUMMARY LENGTH", len(target[0].split("\n")))
             assert len(most_similar_bullet_target[0]) == len(most_similarity_indices)
             most_similar_bullet_target = ["\n".join(t) for t in most_similar_bullet_target]
             reader_tokens_kp_list = self.tokenize_reader_prompt(query, comment_clusters, most_similar_bullet_target)
-            print("OK 1 ENHANCED")
+
             if self.opt.use_gradient_checkpoint_reader:
                 self.reader.gradient_checkpointing_enable()
-            print("OK 2 ENHANCED")
+
             loss_values = []
             reader_output = []
             reader_loss = []
             if len(reader_tokens_kp_list[0]) > 0:
-                print("reader_tokens_kp_list", reader_tokens_kp_list)
+                # print("reader_tokens_kp_list", reader_tokens_kp_list)
                 for reader_tokens in reader_tokens_kp_list[0]:
                     print(reader_tokens.keys())
                     single_kp_output = self.reader(**reader_tokens)
                     reader_output += [single_kp_output]
                     single_kp_reader_loss = single_kp_output.loss
-                    print("SINGLE KP LOSS", single_kp_reader_loss)
+                    # print("SINGLE KP LOSS", single_kp_reader_loss)
                     loss_values.append(single_kp_reader_loss)
                 reader_loss = loss_values
-            print("OK 3 ENHANCED")
 
             if "eval" in self.opt.gold_score_mode:
                 gold_score = self.eval_score(
@@ -1072,10 +880,6 @@ class Atlas(nn.Module):
             elif "loop" in self.opt.gold_score_mode:
                 gold_score = self.loop_score(reader_ids, reader_mask, decoder_input_ids, labels, cfg, bsz)
             elif "ppmean" in self.opt.gold_score_mode:
-                # Ignore, as perplexity is not part of the training objective for decode-only LLM like Mistral
-                # gold_score = reader_loss # TODO Improve here, incorporate supervisory signal from reader for retriever_losss
-                # gold_score = self.perplexity_score(reader_ids, reader_mask, decoder_input_ids, labels, cfg, bsz)
-                # gold_score = None
                 gold_score_total = []
                 if len(reader_tokens_kp_list) > 0:
                     for single_kp_output, single_kp_reader_tokens in zip(reader_output, reader_tokens_kp_list[0]):
@@ -1084,12 +888,6 @@ class Atlas(nn.Module):
 
                 if len(gold_score_total) > 0:
                     gold_score = gold_score_total
-                #     # Stack tensors into a single tensor
-                #     stacked_tensor = torch.stack(gold_score_total)  # Shape: (2, 1)
-                #
-                #     # Compute the mean
-                #     gold_score = stacked_tensor.mean()  # Mean of all elements
-                #     # gold_score = statistics.mean(gold_score_total)
                 else:
                     gold_score = None
             elif "emdr" in self.opt.gold_score_mode:
@@ -1123,8 +921,6 @@ class Atlas(nn.Module):
             if self.opt.use_gradient_checkpoint_retriever:
                 self.retriever.gradient_checkpointing_disable()
 
-            # self.reader.reset_score_storage()
-
             if self.training:
                 self.reader.train()
 
@@ -1140,7 +936,6 @@ class Atlas(nn.Module):
             )
             docs_gold_scores = select_crossattention_scores(docs_crossattention_scores, "attn")
 
-        # loss_lclm = None
         if self.opt.lclm:
             passage_tmp = []
             for idx,id in enumerate(ids):
@@ -1153,7 +948,6 @@ class Atlas(nn.Module):
             fc_mask = fc_tokens["attention_mask"].bool()
 
             n_context_training = fc_ids.size(1)
-            # n_context_training = min(self.opt.n_context, fc_ids.size(1))
             fc_ids_training = fc_ids[:, :n_context_training].contiguous()
             fc_mask_training = fc_mask[:, :n_context_training].contiguous()
 
@@ -1182,7 +976,6 @@ class Atlas(nn.Module):
                 all_fc_score[0,ii] = fc_gold_score[0][idx.item()]
             loss_lclm = self.kldivloss(docs_gold_scores, all_fc_score)
 
-        # mt_loss= None
         if self.opt.mt:
             choices_ids = torch.stack([
                 self.reader_tokenizer(
@@ -1213,7 +1006,6 @@ class Atlas(nn.Module):
         # CLARIFY: DISTILLATION FOR lm, HERE WE FOCUS ON lglm (ARTICLE-LEVEL GENERATION DISTILLATION)
         loss_lglm = None
         if self.opt.lglm:
-            # reader_logits = reader_output.logits
             all_logits = []
             for single_kp_output in reader_output:
                 logits = single_kp_output["logits"]  # Assuming logits is a tensor
@@ -1230,29 +1022,10 @@ class Atlas(nn.Module):
             comment_clusters_tmp = []
             for idx,id in enumerate(ids):
                 split_passages = util.split_fc_pas(id, self.all_fc[id])
-                # passage_tmp.append(split_passages[:self.opt.retriever_n_context])
                 passage_tmp.append(split_passages)
                 comment_clusters_tmp.append(self.all_cluster[id])  # Get ground truth clusters
 
             fc_tokens_kp_list = self.tokenize_reader_prompt(query, comment_clusters_tmp, target)
-
-            # fc_ids = fc_tokens["input_ids"]  # FIXME
-            # fc_mask = fc_tokens["attention_mask"].bool()
-            # n_context_training = fc_ids.size(1)
-            # # n_context_training = min(self.opt.n_context, fc_ids.size(1))
-            # fc_ids_training = fc_ids[:, :n_context_training].contiguous()
-            # fc_mask_training = fc_mask[:, :n_context_training].contiguous()
-            #
-            # fc_ids_training = fc_ids_training.view(fc_ids.size(0), -1)
-            # fc_mask_training = fc_mask_training.view(fc_mask.size(0), -1)
-
-            # fc_output = self.reader(
-            #     input_ids=fc_ids_training,
-            #     attention_mask=fc_mask_training,
-            #     decoder_input_ids=decoder_input_ids,
-            #     labels=labels,
-            #     use_cache=False,
-            # )
 
             loss_lglm = None
             if reader_output:
@@ -1274,9 +1047,6 @@ class Atlas(nn.Module):
                     else:
                         print("No logits were collected.")
 
-                # fc_output = self.reader(**fc_tokens)
-                # fc_logits = fc_output.logits
-                # loss_lglm = self.cross_entropy_loss(reader_logits.squeeze(0), fc_logits.squeeze(0))
                 print("LOGITS")
                 print(reader_logits.shape)
                 print(fc_logits.shape)
@@ -1301,9 +1071,6 @@ class Atlas(nn.Module):
                     crossattention_scores, self.opt.gold_score_mode
                 ).detach()
 
-            # retriever_score = retriever_score / np.sqrt(query_emb.size(-1))
-            # print("RETRIEVER SCORE SIZE ", retriever_score.size())
-
             if self.opt.compute_crossattention_stats:
                 with torch.no_grad():
                     for k, v in crossattention_scores.items():
@@ -1314,24 +1081,12 @@ class Atlas(nn.Module):
                         iter_stats[f"corr/{k}"] = (corr, len(query))
 
             if gold_score is not None:
-                # retriever_score = retriever_score.float()
                 for gold_score_each_kp, cluster_score_each_kp in zip(gold_score, cluster_score):
                     gold_score_each_kp = gold_score_each_kp.float()
                     retriever_loss_each_kp = self.kldivloss(cluster_score_each_kp, gold_score_each_kp)  # kldivloss loss
                     retriever_loss += [retriever_loss_each_kp]
 
-                # gold_score = gold_score.float()
-                # retriever_score = retriever_score.float()
-                # if self.opt.gold_score_mode == "emdr":
-                #     retriever_loss = self.logprob(retriever_score, gold_score, labels)
-                # else:
-                #     retriever_loss = self.kldivloss(retriever_score, gold_score)
-
-        # self.reader.reset_score_storage()
-        # CALCULATE THE FINAL DISTILLATION GENERATION LOSS,
-        # NOTE THAT THEY ALSO COMBINE IT WITH NORMAL LOSS AGAINST GROUND TRUTH (PAPER DOES NOT DECLARE)
-        # if self.opt.lglm: # HERE YES
-        if self.opt.lglm and loss_lglm != None: # HERE YES
+        if self.opt.lglm and loss_lglm != None:
             loss_lglm = self.opt.lglm_cof*loss_lglm
             print("LOSS LGLM", loss_lglm)
             print("READER LOSS", reader_loss)
@@ -1348,9 +1103,7 @@ class Atlas(nn.Module):
             iter_stats["loss/reader_mt_loss"] = (mt_loss.item(), len(query))
 
         print("READER LOSS", reader_loss)
-        # iter_stats["loss/reader_loss"] = (reader_loss.item(), len(query))
 
-        # if retriever_loss is not None:
         if len(retriever_loss) > 0:
             # if loss_lgret is not None:
             if loss_lgret is not None:
@@ -1362,19 +1115,8 @@ class Atlas(nn.Module):
                     print("UPDATED lgret to retriever_loss", retriever_loss)
                 else:
                     retriever_loss = [retrieval_loss_lgret]
-                    # loss_lgret = [retrieval_loss_lgret]
-                # retriever_loss = retriever_loss + loss_lgret
-                # iter_stats["loss/loss_lgret"] = (loss_lgret.item(), len(query))
-
-            # if loss_lcret is not None:
-            #     retriever_loss = retriever_loss + loss_lcret
-            #     iter_stats["loss/loss_lcret"] = (loss_lcret.item(), len(query))
-
-            # iter_stats["loss/retriever_loss"] = (retriever_loss.item(), len(query))
 
         iter_stats["runtime/forward"] = (time.time() - forward_start, 1)
-        # if train_retriever and retriever_loss is None:
-        #     retriever_loss = loss_lgret
         print("RETRIEVER LOSS", retriever_loss)
         return reader_loss, retriever_loss
 
@@ -1405,34 +1147,12 @@ class Atlas(nn.Module):
 
     @torch.no_grad()
     def compute_reader_loss_and_logits(self, tokens):
-    # def compute_reader_loss_and_logits(self, tokens, decoder_input_ids, labels):
-
-        # cfg = self.reader.encoder.config
-        # cfg.bsz = tokens["input_ids"].size(0)
-        # cfg.n_context = tokens["input_ids"].size(1)
-        # # cfg.n_context = min(self.opt.n_context, tokens["input_ids"].size(1))
-        #
-        # reader_loss = self.reader(
-        #     input_ids=tokens["input_ids"].cuda().view(tokens["input_ids"].size(0), -1),
-        #     attention_mask=tokens["attention_mask"].cuda().view(tokens["attention_mask"].size(0), -1),
-        #     decoder_input_ids=decoder_input_ids.cuda(),
-        #     labels=labels.cuda(),
-        #     use_cache=False,
-        # )
         reader_loss = self.reader(**tokens)
         return reader_loss[0].cpu().item(), reader_loss[1]
 
     @torch.no_grad()
     def generate(self, tokens, query, cls_label,choices=None):
-        # cfg = self.reader.encoder.config
-        # cfg.bsz = tokens["input_ids"].size(0)
-        # cfg.n_context = tokens["input_ids"].size(1)
-        # # cfg.n_context = min(self.opt.n_context, tokens["input_ids"].size(1))
-
-        # tokens = {k: v.view(v.size(0), -1) for k, v in tokens.items()}
-
         bos_token_id = None
-
         prefix_allowed_tokens_fn = None
         if self.opt.decoder_prompt_format is not None:
             prefix_str = [self.opt.decoder_prompt_format.format_map({"query": q}) for q in query]
@@ -1442,23 +1162,10 @@ class Atlas(nn.Module):
             inputs=tokens["input_ids"].cuda(),
             temperature=0,
             do_sample=False,
-            # temperature=0.7,
-            # do_sample=True,
             top_p=0.95,
             top_k=40,
             max_new_tokens=256
-            # max_new_tokens=512
-            # input_ids = tokens["input_ids"].cuda(),
-            # attention_mask=tokens["attention_mask"].cuda(),
-            # num_return_sequences=1,
-            # max_length=self.opt.generation_max_length,
-            # min_length=self.opt.generation_min_length,
-            # num_beams=self.opt.generation_num_beams,
-            # length_penalty=self.opt.generation_length_penalty,
-            # forced_bos_token_id=bos_token_id,
-            # prefix_allowed_tokens_fn=prefix_allowed_tokens_fn,
         )
-        # print(outputs)
 
         prediction = None
         if self.opt.mt:
