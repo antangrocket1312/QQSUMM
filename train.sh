@@ -6,15 +6,13 @@ export CUDA_VISIBLE_DEVICES=0
 size=xl
 seed=2
 port=$(shuf -i 15000-16000 -n 1)
-TRAIN_FILE=data/train.${seed}.with_id.jsonl
-EVAL_FILES=data/test.jsonl 
+TRAIN_FILE=data/train/train.jsonl
 PRETRAINED_MODEL=checkpoints/models/atlas/${size}
-PASSAGES=data/copora/docs.jsonl
-INDEX=data/copora/index/
+PASSAGES=data/train/copora/input_reviews.jsonl
+INDEX=data/train/copora/index/
 SAVE_DIR=exps
-FC_FILE=data/copora/fc_articles.json
-CLUSTER_FILE=data/copora/fc_clusters.with_id.json
-LABEL_FILE=data/cls_label.json
+FC_FILE=data/train/copora/gold_retrieved_comments.json
+CLUSTER_FILE=data/train/copora/gold_comment_clusters.json
 EXPERIMENT_NAME=atlas-${size}-seed${seed}
 
 # WARMUP THE LM
@@ -30,7 +28,6 @@ python train.py \
     --reader_model_type mistralai/Mistral-7B-Instruct-v0.2 \
     --model_path ${PRETRAINED_MODEL} \
     --train_data ${TRAIN_FILE} \
-    --eval_data ${EVAL_FILES} \
     --label_file ${LABEL_FILE} \
     --per_gpu_batch_size 1 \
     --n_context ${NCTX} --retriever_n_context ${NCTX} \
@@ -81,7 +78,6 @@ python train.py \
     --reader_model_type mistralai/Mistral-7B-Instruct-v0.2 \
     --model_path ${SAVE_DIR}/${EXPERIMENT_NAME}/checkpoint/step-34 \
     --train_data ${TRAIN_FILE} \
-    --eval_data ${EVAL_FILES} \
     --label_file ${LABEL_FILE} \
     --fc_file ${FC_FILE} \
     --cluster_file ${CLUSTER_FILE} \
