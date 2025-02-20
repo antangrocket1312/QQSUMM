@@ -246,6 +246,7 @@ def write_output(glob_path, output_path):
 
 def save_distributed_dataset(data, dataset_name, opt):
     dir_path = Path(opt.checkpoint_dir) / opt.name
+    predicted_output_dir_path = Path(opt.output_inference_dir) / opt.name
     write_path = dir_path / "tmp_dir"
     write_path.mkdir(exist_ok=True)
     tmp_path = write_path / f"{opt.global_rank}.json"
@@ -254,7 +255,7 @@ def save_distributed_dataset(data, dataset_name, opt):
     if opt.is_distributed:
         torch.distributed.barrier()
     if opt.is_main:
-        final_path = dir_path / f"{dataset_name}.jsonl"
+        final_path = predicted_output_dir_path / f"{dataset_name}.jsonl"
         logger.info(f"Writing dataset with scores at {final_path}")
         results_path = list(write_path.glob("*.json"))
         results_path.sort()

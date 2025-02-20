@@ -31,6 +31,12 @@ class Options:
             help="models are saved here",
         )
         self.parser.add_argument(
+            "--output_inference_dir",
+            type=str,
+            default="./output/",
+            help="predicted JSON output at inference are saved here",
+        )
+        self.parser.add_argument(
             "--model_path",
             type=str,
             default="none",
