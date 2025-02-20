@@ -14,6 +14,7 @@ SAVE_DIR=exps
 FC_FILE=data/train/copora/gold_retrieved_comments.json
 CLUSTER_FILE=data/train/copora/gold_comment_clusters.json
 EXPERIMENT_NAME=atlas-${size}-seed${seed}
+NCTX=50
 
 # WARMUP THE LM
 python train.py \
@@ -41,6 +42,7 @@ python train.py \
     --lora_dropout 0.05 \
     --bf16 False \
     --fp16 True \
+    --output_dir ./brief_hospital_course_mistral_gptq_1_epoch_r128_64a_new_pertinent_2_new_form \
     --num_train_epochs 1 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
@@ -93,6 +95,7 @@ python train.py \
     --lora_dropout 0.05 \
     --bf16 False \
     --fp16 True \
+    --output_dir ./brief_hospital_course_mistral_gptq_1_epoch_r128_64a_new_pertinent_2_new_form \
     --num_train_epochs 1 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
