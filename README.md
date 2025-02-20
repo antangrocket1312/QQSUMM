@@ -61,18 +61,30 @@ QQSUM-RAG consists of two components/stages:
 ![QQSUM_Task](diagram/QQSUM_RAG_Model.png)
 
 ### Training
-To train JustiLM with default hyperparameters and settings mentioned in the paper, run the following command:
+To train QQSUM-RAG with default hyperparameters and settings mentioned in the paper, run the following command:
 ```
 sh train.sh
 ```
 
+The training procedure first warms up the LM with the generation task, before performing the full training, 
+which co-trains the Retriever and the LM with sharable supervision signal.
+You can also customize the hyperparameters and data directory by checking the file [```options.py```](/src/options.py).
+After successful training, the model checkpoints will be saved at ```/exps/atlas-xl-seed2-lgret-lglm```
+
 All prompts are located under [```/prompts```](/prompts)
 
 ### Model Checkpoint
+For ease of reproducibility, we provided the trained model checkpoints of QQSUM-RAG, using Mistral-7B as the LLM for KP Summary Generation.
 Model checkpoint can be downloaded from this [Google Drive link](https://drive.google.com/file/d/1M6JY0Cs3EG6N34S6mWAMpK3wX6TVF4UX/view?usp=sharing).
-Please download the file and unzip the [```/exps```](./exps) directory into the main working directory.
+Please download the file and unzip the ```/exps``` directory into the main working directory.
 
 ### Inference
+[//]: # (We offer two options to perform inference of our QQSUM-RAG model, using Jupyter Notebook files &#40;```notebook```&#41; or Python inference scripts &#40;```script```&#41;. )
+To perform inference of QQSUM-RAG with default hyperparameters and settings mentioned in the paper, run the following command:
+```
+sh inference.sh
+```
+The inference output file will be saved under [```/output/atlas-xl-seed2-lgret-lglm/test-result.jsonl```](//output/atlas-xl-seed2-lgret-lglm/test-result.jsonl)
 
 ### Evaluation & Performance
 

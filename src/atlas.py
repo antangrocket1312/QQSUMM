@@ -156,12 +156,13 @@ class Atlas(nn.Module):
 
         if self.opt.lclm or self.opt.lglm or self.opt.fc_only or self.opt.lgret or self.opt.lcret:
             # Read the BM25 retrieved file as reference for Distillation Training
-            self.all_fc = json.load(open(self.opt.fc_file))
-            self.all_fc = {int(k): v for k, v in self.all_fc.items()}
+            if opt.fc_file is not None:
+                self.all_fc = json.load(open(self.opt.fc_file))
+                self.all_fc = {int(k): v for k, v in self.all_fc.items()}
 
-            # Read the KP Matched Clusters file as reference for Distillation Training
-            self.all_cluster = json.load(open(self.opt.cluster_file))
-            self.all_cluster = {int(k): v for k, v in self.all_cluster.items()}
+                # Read the KP Matched Clusters file as reference for Distillation Training
+                self.all_cluster = json.load(open(self.opt.cluster_file))
+                self.all_cluster = {int(k): v for k, v in self.all_cluster.items()}
 
             self.mse_loss = torch.nn.MSELoss()
 

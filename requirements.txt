@@ -1,3 +1,4 @@
+fschat[model_worker,webui]
 fairscale==0.4.6
 rouge==1.0.1
 wget
