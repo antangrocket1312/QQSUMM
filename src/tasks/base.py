@@ -68,11 +68,6 @@ class BaseTask(object):
         if batch["__size__"] > 0 and not drop_last:
             yield batch
 
-    # def evaluation(self, prediction, ground_truths):
-    #     """most basic evaluation: checks if prediction matches ground truth"""
-    #     sample_metrics = {"accuracy": exact_match_score(prediction, ground_truths)}
-    #     return sample_metrics
-
     @staticmethod
     def shuffle_iterator(dataset):
         d = list(dataset)

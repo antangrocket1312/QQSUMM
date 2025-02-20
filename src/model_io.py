@@ -138,14 +138,6 @@ def load_reader(opt, model_args, data_args, training_args, lora_args):
         if training_args.gradient_checkpointing:
             reader.enable_input_require_grads()
 
-        # if opt.lclm:
-        #     reader.create_crossattention_storage_lm()
-        #
-        # if opt.lclm or opt.compute_crossattention_stats or "eval" in opt.gold_score_mode or "std" in opt.gold_score_mode:
-        #     reader.overwrite_forward_crossattention()
-        #     reader.create_crossattention_storage()
-
-    # reader_tokenizer = transformers.AutoTokenizer.from_pretrained(opt.reader_model_type, padding_side="right")
     reader_tokenizer = transformers.AutoTokenizer.from_pretrained(
         opt.reader_model_type,
         cache_dir=training_args.cache_dir,
@@ -153,8 +145,6 @@ def load_reader(opt, model_args, data_args, training_args, lora_args):
         padding_side="right",
         use_fast=False,
     )
-    # reader_tokenizer.pad_token = reader_tokenizer.unk_token  # FOR VICUNA
-    # reader_tokenizer.pad_token = "</s>"  # FOR MISTRAL
     reader_tokenizer.pad_token = reader_tokenizer.unk_token # FOR MISTRAL
     reader_tokenizer.add_prefix_space = False  # FOR MISTRAL
     return reader, reader_tokenizer
@@ -168,14 +158,11 @@ def _set_reader_encoder_cfg(model, opt):
 
 
 def _cast_atlas_to_precision(atlas_model, precision):
-    # if atlas_model.reader is not None:
-    #     atlas_model.reader = cast_to_precision(atlas_model.reader, precision)
     if atlas_model.retriever is not None and precision == "bf16":
         atlas_model.retriever = cast_to_precision(atlas_model.retriever, precision)
 
 
 def _cast_and_set_attrs_and_send_to_device(model, opt):
-    # _set_reader_encoder_cfg(model, opt)
     set_dropout(model, opt.dropout)
     _cast_atlas_to_precision(model, opt.precision)
     model = model.to(opt.device)
@@ -189,20 +176,9 @@ def _load_atlas_model_state(opt, opt_checkpoint, model, model_dict):
     if opt.query_side_retriever_training and not opt_checkpoint.query_side_retriever_training:
         model_dict = _convert_state_dict_from_dual_encoder_retriever(model_dict)
 
-    print("NO READER STATE")
     model_dict = {k: v for k, v in model_dict.items() if not k.startswith("reader")}
-    # if opt.fc_only:  # dont load reader if in backbone training
-    #     print("NO READER STATE")
-    #     model_dict = {k: v for k, v in model_dict.items() if not k.startswith("reader")}
-
-    # if opt.retrieve_only:  # dont load reader if in retrieve only mode
-    #     model_dict = {k: v for k, v in model_dict.items() if not k.startswith("reader")}
-    #
-    # if opt.use_file_passages:  # dont load retriever if in use_file_passages mode
-    #     model_dict = {k: v for k, v in model_dict.items() if not k.startswith("retriever")}
 
     model.load_state_dict(model_dict)
-    # model = _cast_and_set_attrs_and_send_to_device(model, opt)
     return model
 
 
@@ -223,55 +199,13 @@ def load_atlas_model(dir_path, opt, model_args, data_args, training_args, lora_a
         print("READER LOAD DONE")
         print("OKOKOK")
         model = Atlas(opt, None, retriever, reader_tokenizer, retriever_tokenizer)
-        # model = Atlas(opt, reader, retriever, reader_tokenizer, retriever_tokenizer)
-        # model = _load_atlas_model_state(opt, opt_checkpoint, model, model_dict)
         model.add_reader(reader)
     else:
         print("RELOAD")
-        # model_reader_dict = checkpoint["model_reader"]
-        # model.reader.save_pretrained(os.path.join(dir_path, "checkpoint_reader"), from_pt=True)
-
-        # OPTION 1 (FOR INFERENCE)
-        # compute_dtype = (
-        #     torch.float16
-        #     if training_args.fp16
-        #     else (torch.bfloat16 if training_args.bf16 else torch.float32)
-        # )
-        #
-        # reader_tokenizer = transformers.AutoTokenizer.from_pretrained(
-        #     opt.reader_model_type,
-        #     cache_dir=training_args.cache_dir,
-        #     model_max_length=training_args.model_max_length,
-        #     padding_side="right",
-        #     use_fast=False,
-        # )
-        # reader_tokenizer.pad_token = reader_tokenizer.unk_token
-        # print(opt.model_path + "/../../" + "checkpoint_reader")
-        # reader = AutoPeftModelForCausalLM.from_pretrained(
-        #     # os.path.join(dir_path, "../../checkpoint_reader"),
-        #     opt.model_path + "/../../" + "checkpoint_reader",
-        #     cache_dir=training_args.cache_dir,
-        #     # device_map=device_map,
-        #     quantization_config=BitsAndBytesConfig(
-        #         load_in_4bit=True,
-        #         bnb_4bit_use_double_quant=True,
-        #         bnb_4bit_quant_type="nf4",
-        #         bnb_4bit_compute_dtype=compute_dtype,
-        #     )
-        #     if lora_args.q_lora
-        #     else None,
-        #     # device_map='auto',
-        #     # trust_remote_code=False,
-        #     # revision="main",
-        #     # attn_implementation="flash_attention_2"
-        # )
-
-        # OPTION 2 (FOR TRAINING)
         reader, reader_tokenizer = load_reader(opt, model_args, data_args, training_args, lora_args)
 
         model = Atlas(opt, None, retriever, reader_tokenizer, retriever_tokenizer)
         model = _load_atlas_model_state(opt, opt_checkpoint, model, model_dict)
-        # reader.load_state_dict(model_reader_dict)
         model.add_reader(reader)
         print("SUCCESS")
 
