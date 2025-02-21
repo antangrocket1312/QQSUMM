@@ -1,0 +1,1 @@
+The code was cloned from the [repository](https://github.com/HarrywillDr/KeyPoint-Analysis.git) of the paper "**Do You Hear The People Sing? Key Point Analysis via Iterative Clustering and Abstractive Summarisation**"

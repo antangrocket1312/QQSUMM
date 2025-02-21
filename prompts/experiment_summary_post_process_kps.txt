@@ -1,0 +1,11 @@
+You will be provided with a long-form quantitative summary produced by a quantitative query-focused summarization system
+A long-form quantitative summary captures all opinions from user reviews in answering a question as key points, with prevalence measuring the number of comments supporting each key point. The summary follows the below template:
+'While answering about [Question]:
++ [Prevalence] comments believe that [Key Point]
++ [Prevalence] comments think that [Key Point]
+...'
+
+You were tasked to identify and extract all key points, together with their prevalence, from the long-form quantitative summary.
+Note that you only have to identify and extract one main key point for each bullet point in the provided summary.
+Please provide the extraction in a JSON list with the following format:
+[{'key_point': [Key Point], 'prevalence': 'Prevalence'}, ...]

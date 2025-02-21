@@ -4,7 +4,7 @@ rouge==1.0.1
 wget
 datasets==2.16.1
 numpy==1.23.5
-openai==0.27.8
+openai==0.28
 pandas
 spacy==3.7.2
 tqdm==4.65.0
