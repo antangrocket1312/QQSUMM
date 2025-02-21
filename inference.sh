@@ -6,6 +6,7 @@ export CUDA_VISIBLE_DEVICES=0
 size=xl
 seed=2
 port=$(shuf -i 15000-16000 -n 1)
+TRAIN_FILE=data/train/train.jsonl
 EVAL_FILES=data/test/test.jsonl
 PASSAGES=data/test/copora/input_reviews.jsonl
 INDEX=data/test/copora/index/
@@ -27,6 +28,7 @@ python inference.py \
     --reader_model_type mistralai/Mistral-7B-Instruct-v0.2 \
     --model_path ${SAVE_DIR}/${EXPERIMENT_NAME}-lgret-lglm/checkpoint/step-34 \
     --model_name_or_path ./exps/${EXPERIMENT_NAME}-lgret-lglm/checkpoint_reader \
+    --train_data ${TRAIN_FILE} \
     --eval_data ${EVAL_FILES} \
     --rank_threshold 1.2 \
     --clustering_threshold 1.2 \

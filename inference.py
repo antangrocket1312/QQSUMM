@@ -160,7 +160,6 @@ if __name__ == "__main__":
             step += 1
             train_step_start = time.time()
 
-
     for data_path in opt.eval_data:
         dataset_name = os.path.basename(data_path)
 
