@@ -35,6 +35,7 @@ venv.bak/
 
 *.pth.tar
 *.pt
+*.ckpt
 exps/
 data/copora/index**/
 data/copora/sample/index**/

@@ -26,6 +26,7 @@ conda create --name atlas-env python=3.9
 conda activate qqsum
 conda install pytorch pytorch-cuda=11.8 -c pytorch -c nvidia
 conda install -c pytorch faiss-gpu=1.8.0
+ conda install -c conda-forge importlib_resources
 ```
 
 [//]: # (It is recommended to set up the environment and install required libraries using conda. )
@@ -38,6 +39,8 @@ We also need some additional packages to run the code. The list of packages is l
 pip install -r requirements.txt
 python -m spacy download en_core_web_sm
 python -m spacy download en_core_web_lg
+cd evaluation/AlignScore
+pip install .
 ```
 
 [//]: # (Built upon [Atlas]&#40;https://github.com/facebookresearch/atlas&#41; as the backbone model, )
@@ -84,11 +87,26 @@ To perform inference of QQSUM-RAG with default hyperparameters and settings ment
 ```
 sh inference.sh
 ```
-The inference output file will be saved under [```/output/atlas-xl-seed2-lgret-lglm/test-result.jsonl```](//output/atlas-xl-seed2-lgret-lglm/test-result.jsonl)
+The inference output file will be saved under [```/output/atlas-xl-seed2-lgret-lglm/test-result.jsonl```](/output/atlas-xl-seed2-lgret-lglm/test-result.jsonl)
 
 ### Evaluation & Performance
 
 [//]: # (## QQSUM: Task Introduction)
+
+Codes for reproducing our experiments and evaluations is located in the [```/evaluation```](/evaluation) directory.
+
+**File description:**
+
+#### KP Quality Evaluation #### 
+* ```KP_Quality_Evaluation_sP_sR_sF1.ipynb```: Perform sP/sR/sF1 set-level evaluation of individual generated KPs with reference KPs 
+(extracted from gold community answer - Stage 1 of AmazonKP curation).
+* ```KP_Quality_Evaluation_RD.ipynb```: Perform Redundancy (RD) evaluation among individual generated KPs 
+
+#### KP Quantification Evaluation ####
+* ```KP_Quantification_Evaluation_Matching.ipynb```: Perform comment-KP matching to measure the matching *precision* (correctness of predicted matches) and *recall* (coverage of ground-truth matches) of generated KPs and comments in their respective clusters. 
+* ```KP_Quantification_Evaluation_Factual_Alignment.txt```: Perform factual alignment evaluation between generated KPs and comments in their respective clusters.
+
+[//]: # (Assess the accuracy of the KP comment matching, i.e., how well comments are matched to KPs, by measuring precision &#40;correctness of predicted matches&#41; and recall &#40;coverage of ground-truth matches&#41;)
 
 ## The AmazonKP Dataset
 We proposed AmazonKP, a new dataset specialized for training and evaluating models for the QQSUM task.

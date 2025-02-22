@@ -1,0 +1,11 @@
+In this task you are presented with a query on a product, a key point taken from the summary answering the query, and a sentence taken from a review of that product.
+You will be asked to answer the following question: "Does the key point match, i.e, represent an opinion in the review sentence?"
+A review sentence might express opinions on multiple aspects. A key point matches a review sentence they implicitly discusses issues relating to each other, might not have to absolutely support each other.
+
+The options are:
+- Not At All
+- Somewhat Not Well
+- Somewhat Well
+- Very Well
+
+Remember to explain your answer in the output.

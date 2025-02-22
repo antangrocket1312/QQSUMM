@@ -23,7 +23,7 @@ classifiers = [
 dependencies = [
     "spacy>=3.4.0,<4",
     "nltk>=3.7,<4",
-    "torch>=1.12.1,<2",
+    "torch>2",
     "transformers>=4.20.1,<5",
     "tqdm>=4.64.0,<5",
     "jsonlines>=2.0.0,<3",
