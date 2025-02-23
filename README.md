@@ -91,15 +91,16 @@ sh inference.sh
 ```
 The inference output file will be saved under [```/output/atlas-xl-seed2-lgret-lglm/test-result.jsonl```](/output/atlas-xl-seed2-lgret-lglm/test-result.jsonl)
 
-### Evaluation & Performance
+## Evaluation
 
 [//]: # (## QQSUM: Task Introduction)
 
 Codes for reproducing our experiments and evaluations is located in the [```/evaluation```](/evaluation) directory.
+We offer two options to perform evaluation of QQSUM-RAG, using Jupyter Notebook files or Python scripts.
 
-**File description:**
+### Jupyter Notebook ###
 
-#### KP Quality Evaluation #### 
+#### KP Quality Evaluation ####
 * ```KP_Quality_Evaluation_sP_sR_sF1.ipynb```: Perform sP/sR/sF1 set-level evaluation of individual generated KPs with reference KPs 
 (extracted from gold community answer - Stage 1 of AmazonKP curation).
 * ```KP_Quality_Evaluation_RD.ipynb```: Perform Redundancy (RD) evaluation among individual generated KPs 
@@ -109,6 +110,33 @@ Codes for reproducing our experiments and evaluations is located in the [```/eva
 * ```KP_Quantification_Evaluation_Factual_Alignment.ipynb```: Perform factual alignment evaluation between generated KPs and comments in their respective clusters.
 
 [//]: # (Assess the accuracy of the KP comment matching, i.e., how well comments are matched to KPs, by measuring precision &#40;correctness of predicted matches&#41; and recall &#40;coverage of ground-truth matches&#41;)
+
+
+### Python Script ###
+#### KP Quality Evaluation (sP, sR, sF1)
+```bash
+python evaluation/kp_quality_evaluation_sp_sr_sf1.py \ 
+    --openai_api_key {Your OpenAI API Key}
+```
+
+#### KP Quality Evaluation (Redundancy)
+```bash
+python evaluation/kp_quality_evaluation_rd.py \ 
+    --openai_api_key {Your OpenAI API Key}
+```
+
+#### KP Quantification Evaluation (Factual Alignment)
+```bash
+python evaluation/kp_quantification_comment_factual_alignment.py \ 
+    --openai_api_key {Your OpenAI API Key}
+```
+
+#### KP Quantification Evaluation (Comment-KP Matching)
+```bash
+python evaluation/kp_quantification_comment_matching.py \ 
+    --openai_api_key {Your OpenAI API Key}
+```
+
 
 ## The AmazonKP Dataset
 We proposed AmazonKP, a new dataset specialized for training and evaluating models for the QQSUM task.
