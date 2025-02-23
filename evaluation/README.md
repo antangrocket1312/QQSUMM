@@ -5,7 +5,7 @@
 
 ## KP Quantification Evaluation ##
 * ```KP_Quantification_Evaluation_Matching.ipynb```: Perform comment-KP matching to measure the matching *precision* (correctness of predicted matches) and *recall* (coverage of ground-truth matches) of generated KPs and comments in their respective clusters. 
-* ```KP_Quantification_Evaluation_Factual_Alignment.txt```: Perform factual alignment evaluation between generated KPs and comments in their respective clusters.
+* ```KP_Quantification_Evaluation_Factual_Alignment.ipynb```: Perform factual alignment evaluation between generated KPs and comments in their respective clusters.
 
 
 [//]: # (## KP Textual Quality)

@@ -104,7 +104,7 @@ Codes for reproducing our experiments and evaluations is located in the [```/eva
 
 #### KP Quantification Evaluation ####
 * ```KP_Quantification_Evaluation_Matching.ipynb```: Perform comment-KP matching to measure the matching *precision* (correctness of predicted matches) and *recall* (coverage of ground-truth matches) of generated KPs and comments in their respective clusters. 
-* ```KP_Quantification_Evaluation_Factual_Alignment.txt```: Perform factual alignment evaluation between generated KPs and comments in their respective clusters.
+* ```KP_Quantification_Evaluation_Factual_Alignment.ipynb```: Perform factual alignment evaluation between generated KPs and comments in their respective clusters.
 
 [//]: # (Assess the accuracy of the KP comment matching, i.e., how well comments are matched to KPs, by measuring precision &#40;correctness of predicted matches&#41; and recall &#40;coverage of ground-truth matches&#41;)
 
