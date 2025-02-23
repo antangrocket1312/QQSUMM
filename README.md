@@ -41,6 +41,8 @@ python -m spacy download en_core_web_sm
 python -m spacy download en_core_web_lg
 cd evaluation/AlignScore
 pip install .
+cd ../bleurt
+pip install .
 ```
 
 [//]: # (Built upon [Atlas]&#40;https://github.com/facebookresearch/atlas&#41; as the backbone model, )
