@@ -4,7 +4,17 @@
 
 </div>
 
-This repository maintains the code, data, and model checkpoints for the paper *QQSUM: A Novel Task and Model of Quantitative Query-Focused Summarization for Review-based Product Question Answering*
+This repository maintains the code, data, and model checkpoints for the paper [QQSUM: A Novel Task and Model of Quantitative Query-Focused Summarization for Review-based Product Question Answering](https://arxiv.org/abs/2506.04020) (ACL 2025)
+
+If you use this code or data, please cite our paper:
+```
+@article{tang2025qqsum,
+  title={QQSUM: A Novel Task and Model of Quantitative Query-Focused Summarization for Review-based Product Question Answering},
+  author={Tang, An Quang and Zhang, Xiuzhen and Dinh, Minh Ngoc and Li, Zhuang},
+  journal={arXiv preprint arXiv:2506.04020},
+  year={2025}
+}
+```
 
 We explored a new task, Quantitative Query-Focused Summarization (QQSUM), to generate comprehensive answers capturing diverse viewpoints along with their prevalence for review-based product question answering.
 ![QQSUM_Task](diagram/QQSUM_Task.png)
