@@ -32,7 +32,7 @@ Our model was tested under the following dependencies
 
 We recommend installing using conda and GPU for reasonable runtime. The following will install all dependencies, referenced from Atlas:
 ```bash
-conda create --name atlas-env python=3.9
+conda create --name qqsum python=3.9
 conda activate qqsum
 conda install pytorch pytorch-cuda=11.8 -c pytorch -c nvidia
 conda install -c pytorch faiss-gpu=1.8.0
